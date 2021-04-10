@@ -21,7 +21,7 @@ func setup(filename string, body string) (err error) {
 
 func modifyFile(filename string) (err error) {
 	var f *os.File
-	if f, err = os.OpenFile(filename, os.O_APPEND, os.ModeAppend); err == nil {
+	if f, err = os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend); err == nil {
 		_, err = f.WriteString("\r\nmodify current test file")
 		e := f.Close()
 		if err == nil {
