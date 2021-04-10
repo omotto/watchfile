@@ -14,24 +14,24 @@ import (
 
 // WatchFile struct
 type WatchFile struct {
-	fileName	string				// fileName to watch
-	fileSize 	int64				// File Size to check
-	fileDate 	time.Time			// File modification date to check
-	fileHash    []byte				// File SHA256 HASH to check
+	fileName string    // fileName to watch
+	fileSize int64     // File Size to check
+	fileDate time.Time // File modification date to check
+	fileHash []byte    // File SHA256 HASH to check
 	// --
-	period 		time.Duration		// Analysis watch period in seconds
-	function	interface{}			// function to execute when file change happens
-	fparams		[]interface{}		// function params
+	period   time.Duration // Analysis watch period in seconds
+	function interface{}   // function to execute when file change happens
+	fparams  []interface{} // function params
 	// --
-	stop		chan bool			// Stop channel
-	running		bool				// Watcher status running (true) or stopped
+	stop    chan bool // Stop channel
+	running bool      // Watcher status running (true) or stopped
 }
 
 // NewFileWatcher Creates a new FileWatcher instance
 func NewFileWatcher(fileName string, period int, function interface{}, fparams ...interface{}) (wf WatchFile, err error) {
 	var (
-		f 	*os.File
-		fi 	os.FileInfo
+		f  *os.File
+		fi os.FileInfo
 	)
 	if f, err = os.Open(fileName); err == nil {
 		h := sha256.New()
@@ -44,19 +44,23 @@ func NewFileWatcher(fileName string, period int, function interface{}, fparams .
 								functionParam := reflect.TypeOf(function).In(i)
 								inputParam := reflect.TypeOf(fparams[i])
 								if functionParam != inputParam {
-									if functionParam.Kind() != reflect.Interface { return wf, fmt.Errorf(fmt.Sprintf("param[%d] must be be `%s` not `%s`", i, functionParam, inputParam)) }
-									if !inputParam.Implements(functionParam) { return wf, fmt.Errorf(fmt.Sprintf("param[%d] of type `%s` doesn't implement interface `%s`", i, functionParam, inputParam)) }
+									if functionParam.Kind() != reflect.Interface {
+										return wf, fmt.Errorf(fmt.Sprintf("param[%d] must be be `%s` not `%s`", i, functionParam, inputParam))
+									}
+									if !inputParam.Implements(functionParam) {
+										return wf, fmt.Errorf(fmt.Sprintf("param[%d] of type `%s` doesn't implement interface `%s`", i, functionParam, inputParam))
+									}
 								}
 							}
 							wf.fileName = fileName
 							wf.fileSize = fi.Size()
 							wf.fileDate = fi.ModTime()
 							wf.fileHash = h.Sum(nil)
-							wf.period 	= time.Duration(period * 1000000000) // Convert seconds to time.Duration struct
+							wf.period = time.Duration(period * 1000000000) // Convert seconds to time.Duration struct
 							wf.function = function
-							wf.fparams 	= fparams
-							wf.stop		= make(chan bool)
-							wf.running	= false
+							wf.fparams = fparams
+							wf.stop = make(chan bool)
+							wf.running = false
 						} else {
 							err = errors.New("number of function params and number of provided params doesn't match")
 						}
@@ -86,8 +90,8 @@ func (w *WatchFile) Start() {
 				select {
 				case <-ticker.C:
 					var (
-						f 	*os.File
-						fi 	os.FileInfo
+						f   *os.File
+						fi  os.FileInfo
 						err error
 					)
 					if f, err = os.Open(w.fileName); err == nil {
@@ -129,7 +133,9 @@ func (w *WatchFile) Stop() {
 
 func (w *WatchFile) execFunction() {
 	defer func() {
-		if r := recover(); r != nil { log.Println(r) }
+		if r := recover(); r != nil {
+			log.Println(r)
+		}
 	}()
 	args := make([]reflect.Value, len(w.fparams))
 	for i, param := range w.fparams {

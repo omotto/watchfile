@@ -41,19 +41,19 @@ func TestWatchFileError(t *testing.T) {
 	if err := setup(fileName, "test file to check watchfile package"); err != nil {
 		t.Error(err)
 	} else {
-		if _, err := NewFileWatcher("fileName", 1, func (name string) { fmt.Println(name) }, fileName); err == nil {
+		if _, err := NewFileWatcher("fileName", 1, func(name string) { fmt.Println(name) }, fileName); err == nil {
 			t.Error("NewFileWatcher should return Error, file not found")
 		}
-		if _, err := NewFileWatcher(fileName, 0, func (name string) { fmt.Println(name) }, fileName); err == nil {
+		if _, err := NewFileWatcher(fileName, 0, func(name string) { fmt.Println(name) }, fileName); err == nil {
 			t.Error("NewFileWatcher should return Error, wrong period. It must be greater than 1s")
 		}
-		if _, err := NewFileWatcher(fileName, 1, func () { fmt.Println("Hello, world") }, 10); err == nil {
+		if _, err := NewFileWatcher(fileName, 1, func() { fmt.Println("Hello, world") }, 10); err == nil {
 			t.Error("NewFileWatcher should return Error, wrong number of args")
 		}
 		if _, err := NewFileWatcher(fileName, 1, 0); err == nil {
 			t.Error("NewFileWatcher should return Error, invalid function")
 		}
-		if _, err := NewFileWatcher(fileName, 1, func (s string, n int) {	fmt.Printf("We have params here, string `%s` and nymber %d\n", s, n) }, "s", "s2"); err == nil {
+		if _, err := NewFileWatcher(fileName, 1, func(s string, n int) { fmt.Printf("We have params here, string `%s` and nymber %d\n", s, n) }, "s", "s2"); err == nil {
 			t.Error("NewFileWatcher should return Error, invalid args types")
 		}
 	}
@@ -68,15 +68,15 @@ func TestWatchFileFunction(t *testing.T) {
 		val := 123
 		if wf, err := NewFileWatcher(fileName, 1, func(v *int) { *v++ }, &val); err == nil {
 			wf.Start()
-			for c := 0; c < 5; c ++ {
-				if err := modifyFile(fileName); err  != nil {
+			for c := 0; c < 5; c++ {
+				if err := modifyFile(fileName); err != nil {
 					t.Error(err)
 				}
-				time.Sleep(time.Second*2)
+				time.Sleep(time.Second * 2)
 			}
 			wf.Stop()
 			t.Log(val)
-			if val != 123 + 5 {
+			if val != 123+5 {
 				t.Error("changes not cached")
 			}
 		} else {

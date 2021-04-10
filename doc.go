@@ -23,4 +23,3 @@ Usage
 
 */
 package watchfile
-
