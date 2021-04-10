@@ -68,6 +68,7 @@ func TestWatchFileFunction(t *testing.T) {
 		val := 123
 		if wf, err := NewFileWatcher(fileName, 1, func(v *int) { *v++ }, &val); err == nil {
 			wf.Start()
+			time.Sleep(time.Second * 2)
 			for c := 0; c < 5; c++ {
 				if err := modifyFile(fileName); err != nil {
 					t.Error(err)
